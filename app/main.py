@@ -16,11 +16,24 @@ from models import TranslationRequest, TranslationResult, IndividualTranslations
 models.Base.metadata.create_all(engine)
 #       #       #
 
-# Setup for Jinja2 templates
-templates = Jinja2Templates(directory="templates")
-
+#####################################################################################################
+#####################################################################################################
 app = FastAPI()
 
-@app.get('/index', response_class=HTMLResponse)
-def index(request: Request):
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/index", response_class=HTMLResponse)
+async def read_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
