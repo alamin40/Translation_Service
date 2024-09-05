@@ -99,5 +99,17 @@ async def translate(request: TranslationRequestSchema, background_tasks: Backgro
     #background_tasks.add_task(process_translations, request_data.id, request.text, request.languages)
     return {"payload": request_data}
 
-
+############################################################################
+############################################################################
+############################################################################
+############################################################################
+@app.get("/translate/{request_id}")
+async def get_translation_status(request_id: int, request: Request, db: Session = Depends(get_db)):
+    request_obj = db.query(TranslationRequest).filter(TranslationRequest.id == request_id).first()
+    if not request_obj:
+        raise HTTPException(status_code=404, detail="Request not found")
+    if request_obj.status == "in progress":
+        return {"status": request_obj.status}
+    translations = db.query(TranslationResult).filter(TranslationResult.request_id == request_id).all()
+    return templates.TemplateResponse("results.html", {"request": request, "translations": translations})
 
